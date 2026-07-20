@@ -5,7 +5,12 @@
       "Bash(curl -sI http://localhost:8420/index.html)",
       "Skill(claude-in-chrome)",
       "Bash(curl -s http://localhost:8420/index.html)",
-      "Bash(curl -s http://localhost:8420/css/style.css)"
+      "Bash(curl -s http://localhost:8420/css/style.css)",
+      "Bash(python3 -c ' *)",
+      "Bash(pip3 install *)",
+      "Bash(file *.png *.jpeg *.webp)",
+      "Bash(md5 fitjeans.png vonhguard.png)",
+      "Bash(python3 *)"
     ]
   }
 }
