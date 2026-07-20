@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m http.server 8420)",
+      "Bash(curl -sI http://localhost:8420/index.html)",
+      "Skill(claude-in-chrome)",
+      "Bash(curl -s http://localhost:8420/index.html)",
+      "Bash(curl -s http://localhost:8420/css/style.css)"
+    ]
+  }
+}
