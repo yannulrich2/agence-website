@@ -10,7 +10,12 @@
       "Bash(pip3 install *)",
       "Bash(file *.png *.jpeg *.webp)",
       "Bash(md5 fitjeans.png vonhguard.png)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(python3 -m http.server 8934)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/Wave%20logo2%20\\(1\\).jpeg\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/fitjeans.png\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/HEYSHAPE_RGB_Private_Jet.webp\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/vonhguard.png\")"
     ]
   }
 }
