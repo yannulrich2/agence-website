@@ -15,7 +15,10 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/Wave%20logo2%20\\(1\\).jpeg\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/fitjeans.png\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/HEYSHAPE_RGB_Private_Jet.webp\")",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/vonhguard.png\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8934/images/vonhguard.png\")",
+      "Skill(run)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(npx --no-install playwright --version)"
     ]
   }
 }
