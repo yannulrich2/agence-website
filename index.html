@@ -1,65 +1,370 @@
-/**
- * W.A.V.E. — Réception des leads du site vers Google Sheets
- * 1. Google Sheets > Extensions > Apps Script > colle ce code > Enregistrer
- * 2. Déployer > Nouveau déploiement > Type : Application Web
- *    Exécuter en tant que : Moi | Qui a accès : Tout le monde
- * 3. Copie l'URL /exec et colle-la dans index.html (const SHEET_URL)
- */
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W.A.V.E. — Agence de performance e-commerce | Montréal</title>
+<meta name="description" content="Stratégie publicitaire, achat média et production créative pour marques e-commerce au Canada et aux USA. Support complet de A à Z.">
+<meta property="og:title" content="W.A.V.E. — Agence de performance e-commerce">
+<meta property="og:description" content="On identifie la plateforme qui fera croître ta marque, on produit les créatives et on pilote tout, de A à Z.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0B0B'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' fill='white' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap">
+<style>
+/* ============ CONFIG ============ */
+:root{
+  --ink:#0B0B0B; --paper:#FFFFFF; --soft:#F4F4F2; --line:#E6E6E2;
+  --muted:#4A4A47; --faint:#6B6B67; --dark-field:#1C1C1B; --dark-line:#333331; --dark-muted:#BDBDB8;
+  --serif:'Instrument Serif', Georgia, serif; --sans:'Geist', system-ui, sans-serif;
+  --wrap:1280px; --pad:24px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{max-width:100%;display:block}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--pad)}
+.serif{font-family:var(--serif);font-weight:400}
+.it{font-style:italic}
 
-const SHEET_NAME = 'Leads';
-const NOTIFY_EMAIL = ''; // ex: 'toi@wavevisionary.com' pour recevoir un courriel à chaque lead (laisse vide pour désactiver)
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 32px;border-radius:999px;font-weight:500;font-size:16px;text-decoration:none;border:1px solid var(--ink);transition:transform .2s ease, background .2s ease, color .2s ease;cursor:pointer;font-family:inherit}
+.btn:hover{transform:translateY(-2px)}
+.btn-dark{background:var(--ink);color:var(--paper)}
+.btn-dark:hover{background:#2A2A28}
+.btn-ghost{background:transparent;color:var(--ink)}
+.btn-ghost:hover{background:var(--ink);color:var(--paper)}
 
-const COLUMNS = [
-  'Date', 'Nom', 'Courriel', 'Téléphone', 'Site', 'Budget', 'Besoins', 'Message',
-  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'Page', 'Statut'
-];
+/* Header */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
+header.scrolled{border-bottom-color:var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:20px;padding-bottom:20px}
+.logo{font-family:var(--serif);font-size:30px;letter-spacing:.02em;text-decoration:none}
+.nav-links{display:flex;gap:36px;font-size:15px}
+.nav-links a{text-decoration:none;position:relative}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-4px;width:0;height:1px;background:var(--ink);transition:width .25s}
+.nav-links a:hover::after{width:100%}
+.nav .btn{min-height:46px;padding:0 24px;font-size:15px}
+.burger{display:none;width:46px;height:46px;border-radius:999px;border:1px solid var(--line);background:none;cursor:pointer;align-items:center;justify-content:center}
+@media (max-width:860px){
+  .nav-links,.nav .btn-dark{display:none}
+  .burger{display:inline-flex}
+  .nav-links.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:var(--paper);padding:24px;gap:20px;border-bottom:1px solid var(--line);font-size:20px}
+}
 
-function doPost(e) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
+/* Hero */
+.hero{padding:96px 0 72px;text-align:center}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border:1px solid #DADAD6;border-radius:999px;font-size:14px;color:var(--muted);margin-bottom:40px}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--ink);display:inline-block}
+.hero h1{margin:0 auto;max-width:1100px;font-family:var(--serif);font-weight:400;font-size:clamp(48px,8.5vw,136px);line-height:.98;letter-spacing:-.02em}
+.hero p{margin:40px auto 0;max-width:620px;font-size:20px;color:var(--muted)}
+.ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:44px}
+
+/* Showreel */
+.reel{aspect-ratio:16/8;border-radius:28px;background:var(--ink);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;color:var(--dark-muted);font-size:15px}
+.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+@media (max-width:640px){.reel{aspect-ratio:4/5;border-radius:20px}}
+
+/* Clients */
+.clients{padding:96px 0;text-align:center}
+.eyebrow{font-size:13px;color:#5C5C58;text-transform:uppercase;letter-spacing:.14em}
+.logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:48px 72px;margin-top:40px;font-family:var(--serif);font-size:30px;color:var(--faint)}
+.logos img{height:34px;width:auto;filter:grayscale(1);opacity:.75;transition:opacity .2s}
+.logos img:hover{opacity:1}
+
+/* Services */
+.services{border-top:1px solid var(--line);padding:120px 0}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:32px;margin-bottom:64px}
+.sec-head h2{margin:0;max-width:640px;font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.5vw,80px);line-height:1}
+.sec-head p{margin:0;max-width:380px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:24px}
+.card{border:1px solid var(--line);border-radius:24px;padding:36px;display:flex;flex-direction:column;gap:20px;transition:transform .3s ease, box-shadow .3s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 40px -24px rgba(0,0,0,.25)}
+.card .num{font-family:var(--serif);font-size:48px;line-height:1;font-style:italic}
+.card h3{margin:0;font-size:24px;font-weight:600}
+.card p{margin:0;color:var(--muted)}
+.card.dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.card.dark p{color:#CFCFCB}
+
+/* Process */
+.process{padding:0 0 120px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;border-top:1px solid var(--line);padding-top:48px}
+.step span{font-size:13px;color:var(--faint);letter-spacing:.1em}
+.step h4{margin:10px 0 8px;font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.05}
+.step p{margin:0;color:var(--muted);font-size:16px}
+
+/* Proof */
+.proof{background:var(--soft)}
+.proof .wrap{max-width:1080px;padding-top:120px;padding-bottom:120px;text-align:center}
+.quote{margin:0;font-family:var(--serif);font-size:clamp(30px,4vw,56px);line-height:1.15}
+.author{margin-top:32px;font-size:15px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-top:88px;border-top:1px solid #D6D6D2;padding-top:48px}
+.stat b{display:block;font-family:var(--serif);font-weight:400;font-size:64px;line-height:1}
+.stat small{display:block;font-size:14px;color:var(--muted);margin-top:8px}
+
+/* Contact */
+.contact{padding:120px 0}
+.panel{background:var(--ink);color:var(--paper);border-radius:32px;padding:clamp(28px,6vw,80px);display:flex;flex-wrap:wrap;gap:56px}
+.panel-intro{flex:1 1 340px}
+.panel-intro h2{margin:0 0 20px;font-family:var(--serif);font-weight:400;font-size:clamp(44px,5.5vw,76px);line-height:1}
+.panel-intro p{margin:0;color:#CFCFCB;max-width:380px}
+.panel-intro ul{list-style:none;padding:0;margin:40px 0 0;display:flex;flex-direction:column;gap:12px;color:#CFCFCB;font-size:15px}
+.panel-intro li::before{content:"—";margin-right:10px;color:var(--paper)}
+form{flex:1 1 520px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full,fieldset,.form-foot,.form-msg{grid-column:1/-1}
+label,legend{font-size:13px;color:var(--dark-muted)}
+input[type=text],input[type=email],input[type=url],input[type=tel],select,textarea{background:var(--dark-field);border:1px solid var(--dark-line);border-radius:14px;color:var(--paper);padding:16px 18px;font-size:16px;font-family:inherit;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--paper)}
+input::placeholder,textarea::placeholder{color:#7C7C78}
+textarea{resize:vertical;min-height:96px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='white' stroke-width='1.5'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center;padding-right:44px}
+fieldset{border:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px}
+legend{margin-bottom:10px;width:100%}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--dark-line);border-radius:999px;font-size:15px;color:var(--paper);cursor:pointer;transition:all .2s}
+.chip input:checked + span{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.chip input:focus-visible + span{outline:2px solid var(--paper);outline-offset:2px}
+.form-foot{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.form-foot .btn{width:100%;background:var(--paper);color:var(--ink);border-color:var(--paper);font-weight:600;font-size:17px}
+.form-foot .btn[disabled]{opacity:.6;cursor:wait;transform:none}
+.form-foot small{color:#9A9A95;font-size:13px;text-align:center}
+.form-msg{display:none;padding:16px 18px;border-radius:14px;font-size:15px}
+.form-msg.ok{display:block;background:var(--paper);color:var(--ink)}
+.form-msg.err{display:block;background:#3A1A1A;color:#FFD9D9}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* Footer */
+footer .wrap{padding-top:40px;padding-bottom:56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+footer .links{display:flex;flex-wrap:wrap;gap:24px}
+footer .logo{font-size:24px;color:var(--ink)}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease, transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header id="top">
+  <div class="wrap nav">
+    <a href="#top" class="logo" aria-label="W.A.V.E. accueil">W.A.V.E.</a>
+    <nav class="nav-links" id="menu" aria-label="Navigation principale">
+      <a href="#services">Services</a>
+      <a href="#approche">Approche</a>
+      <a href="#clients">Clients</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#contact" class="btn btn-dark">Parler à un stratège</a>
+    <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M0 1h18M0 11h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div class="pill reveal"><i></i>Agence e-commerce · Montréal — Canada &amp; USA</div>
+    <h1 class="reveal">Les grandes marques <span class="it">ne devinent pas</span> où investir.</h1>
+    <p class="reveal">On identifie la plateforme publicitaire qui fera croître ta marque, on produit les créatives et on pilote tout, de A à Z.</p>
+    <div class="ctas reveal">
+      <a href="#contact" class="btn btn-dark">Réserver un appel stratégique</a>
+      <a href="#services" class="btn btn-ghost">Découvrir l'approche</a>
+    </div>
+  </section>
+
+  <section class="wrap reveal" aria-label="Showreel">
+    <div class="reel">
+      <!-- REMPLACE par ta vidéo : <video src="showreel.mp4" autoplay muted loop playsinline poster="poster.jpg"></video> -->
+      [ Vidéo showreel — tournages clients ]
+    </div>
+  </section>
+
+  <section class="clients wrap" id="clients">
+    <div class="eyebrow reveal">Ils nous font confiance</div>
+    <div class="logos reveal">
+      <!-- REMPLACE chaque <span> par : <img src="logos/marque.svg" alt="Nom de la marque"> -->
+      <span>[Marque 01]</span><span>[Marque 02]</span><span>[Marque 03]</span><span>[Marque 04]</span><span>[Marque 05]</span><span>[Marque 06]</span>
+    </div>
+  </section>
+
+  <section class="services" id="services">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2>Un partenaire. <span class="it">Trois expertises.</span></h2>
+        <p>Spécialisés exclusivement en e-commerce. On parle ROAS, marges et LTV — pas de likes.</p>
+      </div>
+      <div class="cards">
+        <article class="card reveal">
+          <div class="num">i.</div>
+          <h3>Stratégie plateforme</h3>
+          <p>Meta, Google ou TikTok ? On analyse ton produit, ton audience et tes marges pour choisir le canal le plus rentable pour ta business.</p>
+        </article>
+        <article class="card reveal">
+          <div class="num">ii.</div>
+          <h3>Implémentation A à Z</h3>
+          <p>Tracking, structure de campagnes, lancement, tests et optimisation continue. Tu te concentres sur ta marque, on gère le reste.</p>
+        </article>
+        <article class="card dark reveal" id="creatif">
+          <div class="num">iii.</div>
+          <h3>Studio créatif</h3>
+          <p>Une équipe de vidéastes et caméramans pour tourner les créatives dont ta marque a besoin : UGC, produit, lifestyle.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="process" id="approche">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2>Notre approche, <span class="it">de A à Z.</span></h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><span>01</span><h4>Audit</h4><p>Marque, produits, marges, historique publicitaire et tracking.</p></div>
+        <div class="step reveal"><span>02</span><h4>Plan média</h4><p>La bonne plateforme, le bon budget, les bonnes créatives.</p></div>
+        <div class="step reveal"><span>03</span><h4>Lancement</h4><p>Tournage, mise en place des campagnes et premiers tests.</p></div>
+        <div class="step reveal"><span>04</span><h4>Scale</h4><p>On coupe ce qui ne performe pas, on pousse ce qui rapporte.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="proof">
+    <div class="wrap">
+      <p class="quote reveal">« [Témoignage client — une phrase forte sur les résultats obtenus avec W.A.V.E.] »</p>
+      <div class="author reveal">[Nom], fondateur — [Marque]</div>
+      <div class="stats">
+        <div class="stat reveal"><b>[XX M$]</b><small>en ventes générées</small></div>
+        <div class="stat reveal"><b>[XX]</b><small>marques accompagnées</small></div>
+        <div class="stat reveal"><b>[X.X]x</b><small>ROAS moyen</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact wrap" id="contact">
+    <div class="panel reveal">
+      <div class="panel-intro">
+        <h2>Prêt à <span class="it">scaler</span> ?</h2>
+        <p>Quelques questions, 60 secondes. On étudie ta marque et on te revient avec un plan.</p>
+        <ul>
+          <li>Analyse de ta marque et de tes ads actuelles</li>
+          <li>Recommandation de plateforme</li>
+          <li>Plan créatif adapté à tes besoins</li>
+        </ul>
+      </div>
+
+      <form id="leadForm" novalidate>
+        <div class="field"><label for="nom">Nom complet *</label><input id="nom" name="nom" type="text" placeholder="Jean Tremblay" autocomplete="name" required></div>
+        <div class="field"><label for="courriel">Courriel *</label><input id="courriel" name="courriel" type="email" placeholder="jean@marque.com" autocomplete="email" required></div>
+        <div class="field"><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="tel" placeholder="514 000-0000" autocomplete="tel"></div>
+        <div class="field"><label for="site">Site de la marque *</label><input id="site" name="site" type="text" placeholder="marque.com" required></div>
+        <div class="field full"><label for="budget">Budget pub mensuel *</label>
+          <select id="budget" name="budget" required>
+            <option value="" disabled selected>Choisir…</option>
+            <option>Moins de 5 000 $</option>
+            <option>5 000 – 20 000 $</option>
+            <option>20 000 – 50 000 $</option>
+            <option>50 000 $ +</option>
+          </select>
+        </div>
+        <fieldset>
+          <legend>Ce dont tu as besoin</legend>
+          <label class="chip"><input type="checkbox" name="besoins" value="Publicité" checked><span>Publicité</span></label>
+          <label class="chip"><input type="checkbox" name="besoins" value="Créatives vidéo"><span>Créatives vidéo</span></label>
+          <label class="chip"><input type="checkbox" name="besoins" value="Stratégie complète"><span>Stratégie complète</span></label>
+        </fieldset>
+        <div class="field full"><label for="message">Message (optionnel)</label><textarea id="message" name="message" placeholder="Parle-nous de ta marque…"></textarea></div>
+
+        <!-- anti-spam -->
+        <div class="hp" aria-hidden="true"><label for="website2">Ne pas remplir</label><input id="website2" name="website2" type="text" tabindex="-1" autocomplete="off"></div>
+
+        <div class="form-msg" id="formMsg" role="status" aria-live="polite"></div>
+        <div class="form-foot">
+          <button type="submit" class="btn" id="submitBtn">Envoyer ma demande</button>
+          <small>Réponse sous [24 h ouvrables]. Aucune donnée partagée.</small>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><span class="logo">W.A.V.E.</span> — We Are Visionary Enterprise, Montréal</div>
+    <div class="links">
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+      <a href="mailto:[courriel@wavevisionary.com]">[courriel@wavevisionary.com]</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ======= 1. COLLE ICI L'URL DE TON APPS SCRIPT (Déployer > Application Web) ======= */
+const SHEET_URL = "COLLE_TON_URL_APPS_SCRIPT_ICI";
+
+/* Header + menu mobile */
+const header = document.querySelector('header');
+addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 10), {passive:true});
+const burger = document.getElementById('burger'), menu = document.getElementById('menu');
+burger.addEventListener('click', () => {
+  const open = menu.classList.toggle('open');
+  burger.setAttribute('aria-expanded', open);
+});
+menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { menu.classList.remove('open'); burger.setAttribute('aria-expanded', false); }));
+
+/* Animations au scroll */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* UTM : garde la source du lead (ads Meta/Google) */
+const params = new URLSearchParams(location.search);
+['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'].forEach(k => {
+  if (params.get(k)) try { sessionStorage.setItem(k, params.get(k)); } catch(e) {}
+});
+const getUtm = k => { try { return params.get(k) || sessionStorage.getItem(k) || ''; } catch(e) { return params.get(k) || ''; } };
+
+/* Envoi du formulaire vers Google Sheets */
+const form = document.getElementById('leadForm'), msg = document.getElementById('formMsg'), btn = document.getElementById('submitBtn');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.className = 'form-msg'; msg.textContent = '';
+  if (form.website2.value) return; // bot
+  if (!form.checkValidity()) {
+    msg.className = 'form-msg err'; msg.textContent = 'Merci de remplir les champs obligatoires (*) avec un courriel valide.';
+    form.querySelector(':invalid')?.focus(); return;
+  }
+  const fd = new FormData(form);
+  const data = new URLSearchParams();
+  data.append('nom', fd.get('nom'));
+  data.append('courriel', fd.get('courriel'));
+  data.append('telephone', fd.get('telephone') || '');
+  data.append('site', fd.get('site'));
+  data.append('budget', fd.get('budget'));
+  data.append('besoins', fd.getAll('besoins').join(', '));
+  data.append('message', fd.get('message') || '');
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid','gclid'].forEach(k => data.append(k, getUtm(k)));
+  data.append('page', location.href);
+
+  btn.disabled = true; btn.textContent = 'Envoi…';
   try {
-    const p = e.parameter || {};
-    const sheet = getSheet_();
-    const row = [
-      new Date(), p.nom, p.courriel, p.telephone, p.site, p.budget, p.besoins, p.message,
-      p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content, p.utm_term, p.fbclid, p.gclid, p.page, 'Nouveau'
-    ].map(v => (v === undefined ? '' : v));
-    sheet.appendRow(row);
-
-    if (NOTIFY_EMAIL) {
-      MailApp.sendEmail({
-        to: NOTIFY_EMAIL,
-        subject: `Nouveau lead W.A.V.E. — ${p.nom || ''} (${p.budget || ''})`,
-        body:
-          `Nom : ${p.nom}\nCourriel : ${p.courriel}\nTéléphone : ${p.telephone}\nSite : ${p.site}\n` +
-          `Budget : ${p.budget}\nBesoins : ${p.besoins}\nMessage : ${p.message}\n\n` +
-          `Source : ${p.utm_source} / ${p.utm_medium} / ${p.utm_campaign}`
-      });
-    }
-
-    return ContentService.createTextOutput(JSON.stringify({ ok: true }))
-      .setMimeType(ContentService.MimeType.JSON);
+    await fetch(SHEET_URL, { method:'POST', mode:'no-cors', body:data });
+    form.reset();
+    msg.className = 'form-msg ok';
+    msg.textContent = 'Merci ! Ta demande est bien reçue. Un stratège W.A.V.E. te revient très vite.';
+    /* Pixel Meta / GA4 — décommente si installés :
+    if (window.fbq) fbq('track', 'Lead');
+    if (window.gtag) gtag('event', 'generate_lead'); */
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
+    msg.className = 'form-msg err';
+    msg.textContent = "Oups, l'envoi a échoué. Réessaie ou écris-nous directement par courriel.";
   } finally {
-    lock.releaseLock();
+    btn.disabled = false; btn.textContent = 'Envoyer ma demande';
   }
-}
-
-function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(COLUMNS);
-    sheet.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold').setBackground('#0B0B0B').setFontColor('#FFFFFF');
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
-}
-
-/** Lance cette fonction une fois depuis l'éditeur pour tester (ajoute une ligne test). */
-function testLead() {
-  doPost({ parameter: { nom: 'Test W.A.V.E.', courriel: 'test@test.com', site: 'test.com', budget: '5 000 – 20 000 $', besoins: 'Publicité', utm_source: 'test' } });
-}
+});
+</script>
+</body>
+</html>
