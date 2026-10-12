@@ -1,275 +1,65 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>W.A.V.E. — Montreal Creative Marketing Agency</title>
-<meta name="description" content="W.A.V.E. is a Montreal-based creative marketing agency helping ambitious businesses grow their visibility, generate leads, and dominate their market." />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
+/**
+ * W.A.V.E. — Réception des leads du site vers Google Sheets
+ * 1. Google Sheets > Extensions > Apps Script > colle ce code > Enregistrer
+ * 2. Déployer > Nouveau déploiement > Type : Application Web
+ *    Exécuter en tant que : Moi | Qui a accès : Tout le monde
+ * 3. Copie l'URL /exec et colle-la dans index.html (const SHEET_URL)
+ */
 
-<div class="bg-grid" aria-hidden="true"></div>
+const SHEET_NAME = 'Leads';
+const NOTIFY_EMAIL = ''; // ex: 'toi@wavevisionary.com' pour recevoir un courriel à chaque lead (laisse vide pour désactiver)
 
-<header class="nav">
-  <div class="container nav__inner">
-    <a href="#hero" class="nav__logo">
-      <img src="images/Wave logo2 (1).jpeg" alt="W.A.V.E." class="nav__logo-img" />
-      <span class="nav__logo-text">W.A.V.E.</span>
-    </a>
-    <nav class="nav__links">
-      <a href="#who">Who we are</a>
-      <a href="#disciplines">Services</a>
-      <a href="#why">Why us</a>
-      <a href="#cta">Contact</a>
-    </nav>
-    <a href="https://calendly.com/wavevisionary/wave-marketing?utm_id=97760_v0_s00_e0_tv4&amp;month=2026-07" target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn--small">Book a call</a>
-  </div>
-</header>
+const COLUMNS = [
+  'Date', 'Nom', 'Courriel', 'Téléphone', 'Site', 'Budget', 'Besoins', 'Message',
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'Page', 'Statut'
+];
 
-<main>
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const p = e.parameter || {};
+    const sheet = getSheet_();
+    const row = [
+      new Date(), p.nom, p.courriel, p.telephone, p.site, p.budget, p.besoins, p.message,
+      p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content, p.utm_term, p.fbclid, p.gclid, p.page, 'Nouveau'
+    ].map(v => (v === undefined ? '' : v));
+    sheet.appendRow(row);
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <div class="hero__glow" aria-hidden="true"></div>
-    <div class="hero__shape" aria-hidden="true">
-      <div class="orbit orbit--1"></div>
-      <div class="orbit orbit--2"></div>
-      <div class="orbit orbit--3"></div>
-      <div class="orbit-core"></div>
-    </div>
-    <div class="container hero__inner">
-      <p class="eyebrow" data-reveal>Montreal Creative Marketing Agency</p>
-      <h1 class="hero__title" data-reveal>
-        We Help Brands That <span class="text-gradient">Move.</span>
-      </h1>
-      <p class="hero__subtitle" data-reveal>
-        Sharp strategy. Bold creative. We help
-        ambitious businesses grow their visibility, generate leads, and
-        dominate their market.
-      </p>
-      <div class="hero__cta" data-reveal>
-        <a href="https://calendly.com/wavevisionary/wave-marketing?utm_id=97760_v0_s00_e0_tv4&amp;month=2026-07" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Start a project</a>
-        <a href="https://calendly.com/wavevisionary/wave-marketing?utm_id=97760_v0_s00_e0_tv4&amp;month=2026-07" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">Book a free call</a>
-      </div>
-    </div>
-  </section>
+    if (NOTIFY_EMAIL) {
+      MailApp.sendEmail({
+        to: NOTIFY_EMAIL,
+        subject: `Nouveau lead W.A.V.E. — ${p.nom || ''} (${p.budget || ''})`,
+        body:
+          `Nom : ${p.nom}\nCourriel : ${p.courriel}\nTéléphone : ${p.telephone}\nSite : ${p.site}\n` +
+          `Budget : ${p.budget}\nBesoins : ${p.besoins}\nMessage : ${p.message}\n\n` +
+          `Source : ${p.utm_source} / ${p.utm_medium} / ${p.utm_campaign}`
+      });
+    }
 
-  <!-- TAGLINE BAND -->
-  <section class="tagline-band" aria-label="Studio tagline">
-    <p class="tagline-band__text">We help ambitious brands stand out</p>
-  </section>
+    return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}
 
-  <div class="divider" aria-hidden="true"></div>
+function getSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(COLUMNS);
+    sheet.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold').setBackground('#0B0B0B').setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
 
-  <!-- WHO WE ARE -->
-  <section class="who" id="who">
-    <div class="container">
-      <div class="who-grid">
-        <div class="who-grid__left" data-reveal>
-          <p class="eyebrow">Who We Are</p>
-          <h2 class="section-title">Visionary thinking. Relentless execution.</h2>
-        </div>
-        <div class="who-grid__right" data-reveal>
-          <p class="who__text">W.A.V.E. — We Are Visionary Enterprise — is a Montreal-based creative marketing agency built for businesses that refuse to blend in. We combine sharp strategy, bold creative, and hands-on execution to help brands stand out, grow faster, and turn attention into revenue.</p>
-        </div>
-      </div>
-
-      <div class="stats__grid stats__grid--3" data-reveal>
-        <div class="stat-card">
-          <span class="stat-card__number">200<span class="text-accent">+</span></span>
-          <span class="stat-card__label">Brands Elevated</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__number">3.2<span class="text-accent">x</span></span>
-          <span class="stat-card__label">Avg. ROI</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__number">8</span>
-          <span class="stat-card__label">Years in Market</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider" aria-hidden="true"></div>
-
-  <!-- SIX DISCIPLINES -->
-  <section class="disciplines" id="disciplines">
-    <div class="section-bg section-bg--disciplines" aria-hidden="true"></div>
-    <div class="container">
-      <div class="section-head" data-reveal>
-        <p class="eyebrow">What we do</p>
-        <h2 class="section-title">Six disciplines. <span class="text-gradient">One studio.</span></h2>
-      </div>
-
-      <div class="cards-grid">
-        <article class="disc-card" data-reveal>
-          <span class="disc-card__number">01</span>
-          <h3 class="disc-card__title">Experiential Marketing</h3>
-          <p class="disc-card__text">Immersive campaigns and activations that get your brand seen and remembered in the real world.</p>
-        </article>
-
-        <article class="disc-card" data-reveal>
-          <span class="disc-card__number">02</span>
-          <h3 class="disc-card__title">Digital Marketing</h3>
-          <p class="disc-card__text">Paid ads, SEO, and data-driven strategies that turn visibility into revenue.</p>
-        </article>
-
-        <article class="disc-card" data-reveal>
-          <span class="disc-card__number">03</span>
-          <h3 class="disc-card__title">Media Production</h3>
-          <p class="disc-card__text">Professional photo and video shoots that give your brand content worth stopping the scroll for.</p>
-        </article>
-
-        <article class="disc-card" data-reveal>
-          <span class="disc-card__number">04</span>
-          <h3 class="disc-card__title">Graphic Design</h3>
-          <p class="disc-card__text">Visual identity, packaging, and creative assets that make your brand instantly recognizable.</p>
-        </article>
-
-        <article class="disc-card" data-reveal>
-          <span class="disc-card__number">05</span>
-          <h3 class="disc-card__title">Website Creation</h3>
-          <p class="disc-card__text">Fast, conversion-focused websites built to turn visitors into customers.</p>
-        </article>
-
-        <article class="disc-card" data-reveal>
-          <span class="disc-card__number">06</span>
-          <h3 class="disc-card__title">Social Media Management</h3>
-          <p class="disc-card__text">Consistent, on-brand content and community management across every platform that matters.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider" aria-hidden="true"></div>
-
-  <!-- WHY W.A.V.E -->
-  <section class="why" id="why">
-    <div class="section-bg section-bg--why" aria-hidden="true"></div>
-    <div class="container">
-      <div class="section-head" data-reveal>
-        <p class="eyebrow">Why W.A.V.E.</p>
-        <h2 class="section-title">Not just an agency. <span class="text-gradient">A growth partner.</span></h2>
-      </div>
-
-      <div class="why-grid">
-        <article class="why-card" data-reveal>
-          <div class="why-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3 class="why-card__title">Strategy First</h3>
-          <p class="why-card__text">Every campaign starts with data and a clear plan — not guesswork.</p>
-        </article>
-
-        <article class="why-card" data-reveal>
-          <div class="why-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3 class="why-card__title">Full-Service Execution</h3>
-          <p class="why-card__text">Strategy, content, ads, and design — handled end-to-end under one roof.</p>
-        </article>
-
-        <article class="why-card" data-reveal>
-          <div class="why-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3 class="why-card__title">Transparent Results</h3>
-          <p class="why-card__text">Real-time reporting and clear metrics, so you always know what's working.</p>
-        </article>
-
-        <article class="why-card" data-reveal>
-          <div class="why-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3 class="why-card__title">Built for Growth</h3>
-          <p class="why-card__text">Systems and campaigns designed to scale with your business, not cap it.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider" aria-hidden="true"></div>
-
-  <!-- CLIENT STORIES -->
-  <section class="stories" id="clients">
-    <div class="container">
-      <div class="section-head" data-reveal>
-        <p class="eyebrow">Client Stories</p>
-        <h2 class="section-title">Trusted by <span class="text-gradient">ambitious brands.</span></h2>
-      </div>
-
-      <div class="stories-grid">
-        <article class="story-card" data-reveal>
-          <div class="story-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7c-2.2 0-4 1.8-4 4v6h6v-6H6c0-1.1.9-2 2-2V7zm11 0c-2.2 0-4 1.8-4 4v6h6v-6h-3c0-1.1.9-2 2-2V7z"/></svg>
-          </div>
-          <p class="story-card__quote">"W.A.V.E. completely repositioned our brand in under 90 days. Lead volume doubled and our close rate has never looked better."</p>
-          <div class="story-card__author">
-            <span class="story-card__name">Alex Moreau</span>
-            <span class="story-card__title">Founder &amp; CEO</span>
-          </div>
-        </article>
-
-        <article class="story-card" data-reveal>
-          <div class="story-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7c-2.2 0-4 1.8-4 4v6h6v-6H6c0-1.1.9-2 2-2V7zm11 0c-2.2 0-4 1.8-4 4v6h6v-6h-3c0-1.1.9-2 2-2V7z"/></svg>
-          </div>
-          <p class="story-card__quote">"They don't just execute — they think like an internal team. Best marketing partner we've worked with."</p>
-          <div class="story-card__author">
-            <span class="story-card__name">Jade Bergeron</span>
-            <span class="story-card__title">Head of Growth</span>
-          </div>
-        </article>
-
-        <article class="story-card" data-reveal>
-          <div class="story-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7c-2.2 0-4 1.8-4 4v6h6v-6H6c0-1.1.9-2 2-2V7zm11 0c-2.2 0-4 1.8-4 4v6h6v-6h-3c0-1.1.9-2 2-2V7z"/></svg>
-          </div>
-          <p class="story-card__quote">"Sharp strategy, fast execution, real numbers. Exactly what we needed to break into a new market."</p>
-          <div class="story-card__author">
-            <span class="story-card__name">Marc-André Tremblay</span>
-            <span class="story-card__title">VP Marketing</span>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider" aria-hidden="true"></div>
-
-  <!-- CTA -->
-  <section class="cta" id="cta">
-    <div class="cta__glow" aria-hidden="true"></div>
-    <div class="container cta__inner" data-reveal>
-      <h2 class="cta__title">Ready to <span class="text-gradient">grow?</span></h2>
-      <p class="cta__subtitle">Book a free 30-minute strategy call. No pitch — just a conversation about your project.</p>
-      <div class="cta__calendly-wrap">
-        <div class="calendly-inline-widget" data-url="https://calendly.com/wavevisionary/wave-marketing?utm_id=97760_v0_s00_e0_tv4&month=2026-07&hide_gdpr_banner=1"></div>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<footer class="footer">
-  <div class="container footer__inner">
-    <a href="#hero" class="nav__logo">W.A.V.E.<span class="nav__dot">.</span></a>
-    <nav class="footer__links">
-      <a href="#who">Who we are</a>
-      <a href="#disciplines">Services</a>
-      <a href="#why">Why us</a>
-      <a href="#cta">Contact</a>
-    </nav>
-    <p class="footer__copy">© 2026 W.A.V.E. Studio. All rights reserved.</p>
-  </div>
-</footer>
-
-<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
-<script src="js/main.js"></script>
-</body>
-</html>
+/** Lance cette fonction une fois depuis l'éditeur pour tester (ajoute une ligne test). */
+function testLead() {
+  doPost({ parameter: { nom: 'Test W.A.V.E.', courriel: 'test@test.com', site: 'test.com', budget: '5 000 – 20 000 $', besoins: 'Publicité', utm_source: 'test' } });
+}
