@@ -41,7 +41,9 @@ img{max-width:100%;display:block}
 header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
 header.scrolled{border-bottom-color:var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:20px;padding-bottom:20px}
-.logo{font-family:var(--serif);font-size:30px;letter-spacing:.02em;text-decoration:none}
+.logo{display:inline-flex;align-items:center;text-decoration:none}
+.logo img{height:42px;width:auto}
+@media (max-width:860px){.logo img{height:34px}}
 .nav-links{display:flex;gap:36px;font-size:15px}
 .nav-links a{text-decoration:none;position:relative}
 .nav-links a::after{content:"";position:absolute;left:0;bottom:-4px;width:0;height:1px;background:var(--ink);transition:width .25s}
@@ -176,7 +178,8 @@ legend{margin-bottom:10px;width:100%}
 /* Footer */
 footer .wrap{padding-top:40px;padding-bottom:56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
 footer .links{display:flex;flex-wrap:wrap;gap:24px}
-footer .logo{font-size:24px;color:var(--ink)}
+footer .foot-brand{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+footer .foot-brand img{height:30px;width:auto}
 
 /* Reveal */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease, transform .8s ease}
@@ -188,7 +191,7 @@ footer .logo{font-size:24px;color:var(--ink)}
 
 <header id="top">
   <div class="wrap nav">
-    <a href="#top" class="logo" aria-label="W.A.V.E. accueil">W.A.V.E.</a>
+    <a href="#top" class="logo" aria-label="W.A.V.E. accueil"><img src="images/wave-logo.png" alt="W.A.V.E. agence de marketing" width="474" height="129"></a>
     <nav class="nav-links" id="menu" aria-label="Navigation principale">
       <a href="#realisations">Campagnes</a>
       <a href="#services">Services</a>
@@ -376,7 +379,7 @@ footer .logo{font-size:24px;color:var(--ink)}
 
 <footer>
   <div class="wrap">
-    <div><span class="logo">W.A.V.E.</span> — We Are Visionary Enterprise, Montréal</div>
+    <div class="foot-brand"><img src="images/wave-logo.png" alt="W.A.V.E." width="474" height="129"><span>We Are Visionary Enterprise, Montréal</span></div>
     <div class="links">
       <a href="#">Instagram</a>
       <a href="#">LinkedIn</a>
