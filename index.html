@@ -61,7 +61,11 @@ header.scrolled{border-bottom-color:var(--line)}
 /* Hero */
 .hero{padding:96px 0 72px;text-align:center}
 .pill{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border:1px solid #DADAD6;border-radius:999px;font-size:14px;color:var(--muted);margin-bottom:40px}
-.pill i{width:7px;height:7px;border-radius:50%;background:var(--ink);display:inline-block}
+.pill i{position:relative;width:8px;height:8px;border-radius:50%;background:#22C55E;display:inline-block;animation:blink 1.6s ease-in-out infinite}
+.pill i::after{content:"";position:absolute;inset:0;border-radius:50%;background:#22C55E;animation:ping 1.6s ease-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes ping{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pill i,.pill i::after{animation:none}}
 .hero h1{margin:0 auto;max-width:1100px;font-family:var(--serif);font-size:clamp(42px,7vw,112px);line-height:1;letter-spacing:-.03em}
 .hero p{margin:40px auto 0;max-width:620px;font-size:20px;color:var(--muted)}
 .ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:44px}
