@@ -70,9 +70,22 @@ header.scrolled{border-bottom-color:var(--line)}
 /* Clients */
 .clients{padding:96px 0;text-align:center}
 .eyebrow{font-size:13px;color:#5C5C58;text-transform:uppercase;letter-spacing:.14em}
-.logos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:48px 72px;margin-top:40px;font-family:var(--serif);font-size:30px;color:var(--faint)}
-.logos img{height:40px;width:auto;max-width:180px;object-fit:contain;filter:grayscale(1);opacity:.75;transition:opacity .2s}
-.logos img:hover{opacity:1}
+.logos{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:40px}
+.logo-cell{height:72px;border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;padding:14px;background:var(--paper)}
+.logo-cell img{max-height:30px;max-width:100%;width:auto;object-fit:contain;filter:grayscale(1);opacity:.75;transition:opacity .2s}
+.logo-cell:hover img{opacity:1}
+@media (max-width:960px){.logos{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:520px){.logos{grid-template-columns:repeat(3,1fr);gap:8px}.logo-cell{height:60px;padding:10px}.logo-cell img{max-height:24px}}
+
+/* Plateformes */
+.platforms{border-top:1px solid var(--line);padding:96px 0;text-align:center}
+.platforms h2{margin:16px auto 0;max-width:720px;font-family:var(--serif);font-weight:400;font-size:clamp(36px,4.5vw,64px);line-height:1}
+.plat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
+.plat{border:1px solid var(--line);border-radius:20px;height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px}
+.plat img{max-height:44px;max-width:80%;width:auto;object-fit:contain}
+.plat .pname{font-family:var(--serif);font-size:28px;line-height:1}
+.plat small{font-size:13px;color:var(--faint)}
+@media (max-width:760px){.plat-grid{grid-template-columns:repeat(2,1fr)}.plat{height:120px}}
 
 /* Réalisations (photos + vidéos) */
 .work{border-top:1px solid var(--line);padding:120px 0}
@@ -196,11 +209,39 @@ footer .logo{font-size:24px;color:var(--ink)}
 
   <section class="clients wrap" id="clients">
     <div class="eyebrow reveal">Ils nous font confiance</div>
+    <!-- 14 cases de logos. Les 4 premières sont déjà remplies.
+         Pour les autres : mets ton logo dans le dossier images/ avec le nom logo-5, logo-6 … logo-14
+         (.png, .jpg, .webp ou .svg). Une case sans logo est cachée. -->
     <div class="logos reveal">
-      <img src="images/HEYSHAPE_RGB_Private_Jet.webp" alt="Heyshape" loading="lazy">
-      <img src="images/fitjeans.png" alt="Fitjeans" loading="lazy">
-      <img src="images/vonhguard.png" alt="Vonhguard" loading="lazy">
-      <img src="images/stolen.jpeg" alt="Stolen" loading="lazy">
+      <div class="logo-cell"><img src="images/HEYSHAPE_RGB_Private_Jet.webp" alt="Heyshape" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/fitjeans.png" alt="Fitjeans" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/vonhguard.png" alt="Vonhguard" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/stolen.jpeg" alt="Stolen" loading="lazy"></div>
+      <div class="logo-cell" data-logo="logo-5"></div>
+      <div class="logo-cell" data-logo="logo-6"></div>
+      <div class="logo-cell" data-logo="logo-7"></div>
+      <div class="logo-cell" data-logo="logo-8"></div>
+      <div class="logo-cell" data-logo="logo-9"></div>
+      <div class="logo-cell" data-logo="logo-10"></div>
+      <div class="logo-cell" data-logo="logo-11"></div>
+      <div class="logo-cell" data-logo="logo-12"></div>
+      <div class="logo-cell" data-logo="logo-13"></div>
+      <div class="logo-cell" data-logo="logo-14"></div>
+    </div>
+  </section>
+
+  <section class="platforms" id="plateformes">
+    <div class="wrap">
+      <div class="eyebrow reveal">Nos plateformes</div>
+      <h2 class="reveal">Les plateformes <span class="it">qu'on maîtrise.</span></h2>
+      <!-- Logos : mets-les dans images/ avec les noms shopify, meta, google-ads, tiktok-ads
+           (.png, .svg, .jpg ou .webp). Tant qu'un logo n'est pas là, le nom s'affiche en texte. -->
+      <div class="plat-grid">
+        <div class="plat reveal" data-plat="shopify"><span class="pname">Shopify</span><small>E-commerce</small></div>
+        <div class="plat reveal" data-plat="meta"><span class="pname">Meta</span><small>Facebook &amp; Instagram Ads</small></div>
+        <div class="plat reveal" data-plat="google-ads"><span class="pname">Google Ads</span><small>Search, Shopping &amp; YouTube</small></div>
+        <div class="plat reveal" data-plat="tiktok-ads"><span class="pname">TikTok Ads</span><small>Ads &amp; Shop</small></div>
+      </div>
     </div>
   </section>
 
@@ -350,6 +391,28 @@ menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { menu
 /* Animations au scroll */
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12});
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* Logos clients + plateformes : trouve le fichier tout seul */
+const findImg = (name, ok, fail) => {
+  const tries = ['png','svg','webp','jpg','jpeg'].map(x => 'images/'+name+'.'+x);
+  const next = i => {
+    if (i >= tries.length) { fail(); return; }
+    const img = new Image();
+    img.onload = () => ok(img);
+    img.onerror = () => next(i+1);
+    img.src = tries[i];
+  };
+  next(0);
+};
+document.querySelectorAll('.logo-cell[data-logo]').forEach(cell => {
+  findImg(cell.dataset.logo, img => { img.alt = 'Logo client'; cell.appendChild(img); }, () => cell.remove());
+});
+document.querySelectorAll('.plat[data-plat]').forEach(box => {
+  findImg(box.dataset.plat, img => {
+    img.alt = box.querySelector('.pname').textContent;
+    box.querySelector('.pname').replaceWith(img);
+  }, () => {});
+});
 
 /* Galerie : trouve la vidéo ou la photo de chaque case */
 const playIO = new IntersectionObserver(es => es.forEach(e => {
