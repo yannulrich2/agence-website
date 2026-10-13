@@ -70,12 +70,16 @@ header.scrolled{border-bottom-color:var(--line)}
 /* Clients */
 .clients{padding:96px 0;text-align:center}
 .eyebrow{font-size:13px;color:#5C5C58;text-transform:uppercase;letter-spacing:.14em}
-.logos{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-top:40px}
-.logo-cell{height:72px;border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;padding:14px;background:var(--paper)}
-.logo-cell img{max-height:30px;max-width:100%;width:auto;object-fit:contain;filter:grayscale(1);opacity:.75;transition:opacity .2s}
+.logos{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:40px}
+.logo-cell{height:96px;border:1px solid var(--line);border-radius:16px;display:flex;align-items:center;justify-content:center;padding:18px 22px;background:var(--paper)}
+.logo-cell img{max-height:44px;max-width:100%;width:auto;height:auto;object-fit:contain;filter:grayscale(1);opacity:.8;transition:opacity .2s}
 .logo-cell:hover img{opacity:1}
-@media (max-width:960px){.logos{grid-template-columns:repeat(4,1fr)}}
-@media (max-width:520px){.logos{grid-template-columns:repeat(3,1fr);gap:8px}.logo-cell{height:60px;padding:10px}.logo-cell img{max-height:24px}}
+.logo-cell.tall img{max-height:64px}
+.logo-cell.more{flex-direction:column;gap:2px;background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.logo-cell.more b{font-family:var(--serif);font-weight:400;font-size:34px;line-height:1}
+.logo-cell.more span{font-size:13px;color:var(--dark-muted)}
+
+@media (max-width:700px){.logos{grid-template-columns:repeat(2,1fr);gap:8px}.logo-cell{height:80px;padding:14px}.logo-cell img{max-height:34px}.logo-cell.tall img{max-height:52px}.logo-cell.more b{font-size:26px}.logo-cell.more span{font-size:11px}}
 
 /* Plateformes */
 .platforms{border-top:1px solid var(--line);padding:96px 0;text-align:center}
@@ -209,24 +213,17 @@ footer .logo{font-size:24px;color:var(--ink)}
 
   <section class="clients wrap" id="clients">
     <div class="eyebrow reveal">Ils nous font confiance</div>
-    <!-- 14 cases de logos. Les 4 premières sont déjà remplies.
-         Pour les autres : mets ton logo dans le dossier images/ avec le nom logo-5, logo-6 … logo-14
-         (.png, .jpg, .webp ou .svg). Une case sans logo est cachée. -->
     <div class="logos reveal">
-      <div class="logo-cell"><img src="images/HEYSHAPE_RGB_Private_Jet.webp" alt="Heyshape" loading="lazy"></div>
-      <div class="logo-cell"><img src="images/fitjeans.png" alt="Fitjeans" loading="lazy"></div>
-      <div class="logo-cell"><img src="images/vonhguard.png" alt="Vonhguard" loading="lazy"></div>
-      <div class="logo-cell"><img src="images/stolen.jpeg" alt="Stolen" loading="lazy"></div>
-      <div class="logo-cell" data-logo="logo-5"></div>
-      <div class="logo-cell" data-logo="logo-6"></div>
-      <div class="logo-cell" data-logo="logo-7"></div>
-      <div class="logo-cell" data-logo="logo-8"></div>
-      <div class="logo-cell" data-logo="logo-9"></div>
-      <div class="logo-cell" data-logo="logo-10"></div>
-      <div class="logo-cell" data-logo="logo-11"></div>
-      <div class="logo-cell" data-logo="logo-12"></div>
-      <div class="logo-cell" data-logo="logo-13"></div>
-      <div class="logo-cell" data-logo="logo-14"></div>
+      <div class="logo-cell"><img src="images/client-koodo.png" alt="Koodo" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/client-jean-coutu.png" alt="Jean Coutu" loading="lazy"></div>
+      <div class="logo-cell tall"><img src="images/client-kos.png" alt="KOS" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/client-heyshape.png" alt="Heyshape" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/client-nvgtn.png" alt="NVGTN" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/client-fitjeans.png" alt="Fitjeans" loading="lazy"></div>
+      <div class="logo-cell tall"><img src="images/client-groupe-grenier-menagier.png" alt="Groupe Grenier Ménagier" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/client-cocktail-bomb-shop.png" alt="Cocktail Bomb Shop" loading="lazy"></div>
+      <div class="logo-cell"><img src="images/client-unmute.png" alt="UNMUTE" loading="lazy"></div>
+      <div class="logo-cell more"><b>+150</b><span>autres marques</span></div>
     </div>
   </section>
 
