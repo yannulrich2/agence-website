@@ -167,7 +167,7 @@ footer .logo{font-size:24px;color:var(--ink)}
 
 <main>
   <section class="hero wrap">
-    <div class="pill reveal"><i></i>Agence e-commerce · Montréal — Canada &amp; USA</div>
+    <div class="pill reveal"><i></i>Agence marketing</div>
     <h1 class="reveal">Les grandes marques <span class="it">ne devinent pas</span> où investir.</h1>
     <p class="reveal">On identifie la plateforme publicitaire qui fera croître ta marque, on produit les créatives et on pilote tout, de A à Z.</p>
     <div class="ctas reveal">
@@ -258,7 +258,7 @@ footer .logo{font-size:24px;color:var(--ink)}
         <div class="field"><label for="nom">Nom complet *</label><input id="nom" name="nom" type="text" placeholder="Jean Tremblay" autocomplete="name" required></div>
         <div class="field"><label for="courriel">Courriel *</label><input id="courriel" name="courriel" type="email" placeholder="jean@marque.com" autocomplete="email" required></div>
         <div class="field"><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="tel" placeholder="514 000-0000" autocomplete="tel"></div>
-        <div class="field"><label for="site">Site de la marque *</label><input id="site" name="site" type="text" placeholder="marque.com" required></div>
+        <div class="field"><label for="site">Site web (si tu en as un)</label><input id="site" name="site" type="text" placeholder="marque.com — ou laisse vide"></div>
         <div class="field full"><label for="budget">Budget pub mensuel *</label>
           <select id="budget" name="budget" required>
             <option value="" disabled selected>Choisir…</option>
@@ -340,7 +340,7 @@ form.addEventListener('submit', async (e) => {
   data.append('nom', fd.get('nom'));
   data.append('courriel', fd.get('courriel'));
   data.append('telephone', fd.get('telephone') || '');
-  data.append('site', fd.get('site'));
+  data.append('site', fd.get('site') || 'Aucun site — projet de zéro');
   data.append('budget', fd.get('budget'));
   data.append('besoins', fd.getAll('besoins').join(', '));
   data.append('message', fd.get('message') || '');
