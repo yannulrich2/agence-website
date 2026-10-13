@@ -62,11 +62,6 @@ header.scrolled{border-bottom-color:var(--line)}
 .hero p{margin:40px auto 0;max-width:620px;font-size:20px;color:var(--muted)}
 .ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:44px}
 
-/* Showreel */
-.reel{aspect-ratio:16/8;border-radius:28px;background:var(--ink);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;color:var(--dark-muted);font-size:15px}
-.reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-@media (max-width:640px){.reel{aspect-ratio:4/5;border-radius:20px}}
-
 /* Clients */
 .clients{padding:96px 0;text-align:center}
 .eyebrow{font-size:13px;color:#5C5C58;text-transform:uppercase;letter-spacing:.14em}
@@ -92,14 +87,21 @@ header.scrolled{border-bottom-color:var(--line)}
 @media (max-width:1000px){.plat{flex-basis:calc((100% - 36px)/4)}}
 @media (max-width:600px){.plat-grid{gap:8px}.plat{flex-basis:calc((100% - 8px)/2);height:84px;padding:14px}.plat img{max-height:32px}.plat.tall img{max-height:46px}}
 
-/* Réalisations (photos + vidéos) */
+/* Campagnes réalisées */
 .work{border-top:1px solid var(--line);padding:120px 0}
-.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.tile{position:relative;aspect-ratio:4/5;border-radius:24px;overflow:hidden;background:var(--soft)}
-.tile img,.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
-.tile:hover img,.tile:hover video{transform:scale(1.04)}
-@media (max-width:860px){.gallery{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:520px){.gallery{grid-template-columns:1fr}}
+.gallery{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;align-items:start}
+.tile{position:relative;border-radius:24px;overflow:hidden;background:var(--ink)}
+.tile.v{grid-column:span 2;aspect-ratio:9/16}
+.tile.h{grid-column:span 3;aspect-ratio:4/3}
+.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.tile:hover video{transform:scale(1.03)}
+@media (max-width:700px){
+  .gallery{grid-template-columns:repeat(2,1fr);gap:10px}
+  .tile{border-radius:16px}
+  .tile.v{grid-column:span 1}
+  .tile.h{grid-column:span 2}
+  .tile.v.wide-m{grid-column:span 2;aspect-ratio:4/5}
+}
 
 /* Services */
 .services{border-top:1px solid var(--line);padding:120px 0}
@@ -204,14 +206,6 @@ footer .logo{font-size:24px;color:var(--ink)}
     </div>
   </section>
 
-  <section class="wrap reveal" aria-label="Showreel">
-    <div class="reel">
-      <!-- Vidéo principale : mets ton fichier dans le dossier videos/ avec le nom showreel.mp4 -->
-      <span>[ Vidéo showreel — tournages clients ]</span>
-      <video src="videos/showreel.mp4" poster="images/showreel-poster.jpg" autoplay muted loop playsinline preload="metadata" onerror="this.remove()"></video>
-    </div>
-  </section>
-
   <section class="clients wrap" id="clients">
     <div class="eyebrow reveal">Ils nous font confiance</div>
     <div class="logos reveal">
@@ -249,16 +243,12 @@ footer .logo{font-size:24px;color:var(--ink)}
       <div class="sec-head reveal">
         <h2>Campagnes <span class="it">réalisées.</span></h2>
       </div>
-      <!-- Mets tes fichiers nommés projet-1, projet-2 … projet-6 :
-           vidéos -> dossier videos/ (.mp4) | photos -> dossier images/ (.jpg, .png ou .webp)
-           Le site trouve le bon fichier tout seul. Une case sans fichier est cachée. -->
       <div class="gallery">
-        <div class="tile reveal" data-media="projet-1"></div>
-        <div class="tile reveal" data-media="projet-2"></div>
-        <div class="tile reveal" data-media="projet-3"></div>
-        <div class="tile reveal" data-media="projet-4"></div>
-        <div class="tile reveal" data-media="projet-5"></div>
-        <div class="tile reveal" data-media="projet-6"></div>
+        <div class="tile v reveal"><video src="videos/campagne-1.mp4" poster="images/campagne-1.jpg" muted loop playsinline preload="none" aria-label="Campagne 1"></video></div>
+        <div class="tile v reveal"><video src="videos/campagne-2.mp4" poster="images/campagne-2.jpg" muted loop playsinline preload="none" aria-label="Campagne 2"></video></div>
+        <div class="tile v wide-m reveal"><video src="videos/campagne-3.mp4" poster="images/campagne-3.jpg" muted loop playsinline preload="none" aria-label="Campagne 3"></video></div>
+        <div class="tile h reveal"><video src="videos/campagne-4.mp4" poster="images/campagne-4.jpg" muted loop playsinline preload="none" aria-label="Campagne 4"></video></div>
+        <div class="tile h reveal"><video src="videos/campagne-5.mp4" poster="images/campagne-5.jpg" muted loop playsinline preload="none" aria-label="Campagne 5"></video></div>
       </div>
     </div>
   </section>
@@ -406,37 +396,11 @@ document.querySelectorAll('.logo-cell[data-logo]').forEach(cell => {
   findImg(cell.dataset.logo, img => { img.alt = 'Logo client'; cell.appendChild(img); }, () => cell.remove());
 });
 
-/* Galerie : trouve la vidéo ou la photo de chaque case */
+/* Campagnes : les vidéos jouent quand elles sont visibles */
 const playIO = new IntersectionObserver(es => es.forEach(e => {
   const v = e.target; if (e.isIntersecting) v.play().catch(()=>{}); else v.pause();
 }), {threshold:.25});
-const gallery = document.querySelector('.gallery');
-let found = 0, pending = 0;
-document.querySelectorAll('.tile[data-media]').forEach(tile => {
-  const name = tile.dataset.media;
-  const tries = ['videos/'+name+'.mp4','images/'+name+'.jpg','images/'+name+'.jpeg','images/'+name+'.png','images/'+name+'.webp'];
-  pending++;
-  const next = i => {
-    if (i >= tries.length) { tile.remove(); done(); return; }
-    const src = tries[i];
-    if (src.endsWith('.mp4')) {
-      const v = document.createElement('video');
-      v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
-      v.setAttribute('muted',''); v.setAttribute('playsinline','');
-      v.onloadedmetadata = () => { tile.appendChild(v); playIO.observe(v); found++; done(); };
-      v.onerror = () => next(i+1);
-      v.src = src;
-    } else {
-      const img = new Image();
-      img.alt = 'Réalisation W.A.V.E.'; img.loading = 'lazy';
-      img.onload = () => { tile.appendChild(img); found++; done(); };
-      img.onerror = () => next(i+1);
-      img.src = src;
-    }
-  };
-  next(0);
-});
-function done(){ if (--pending === 0 && found === 0) document.getElementById('realisations').remove(); }
+document.querySelectorAll('.tile video').forEach(v => { v.muted = true; playIO.observe(v); });
 
 /* UTM : garde la source du lead (ads Meta/Google) */
 const params = new URLSearchParams(location.search);
