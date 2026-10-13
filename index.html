@@ -81,15 +81,16 @@ header.scrolled{border-bottom-color:var(--line)}
 
 @media (max-width:700px){.logos{grid-template-columns:repeat(2,1fr);gap:8px}.logo-cell{height:80px;padding:14px}.logo-cell img{max-height:34px}.logo-cell.tall img{max-height:52px}.logo-cell.more b{font-size:26px}.logo-cell.more span{font-size:11px}}
 
-/* Plateformes */
+/* Partenaires */
 .platforms{border-top:1px solid var(--line);padding:96px 0;text-align:center}
 .platforms h2{margin:16px auto 0;max-width:720px;font-family:var(--serif);font-weight:400;font-size:clamp(36px,4.5vw,64px);line-height:1}
-.plat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
-.plat{border:1px solid var(--line);border-radius:20px;height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px}
-.plat img{max-height:44px;max-width:80%;width:auto;object-fit:contain}
-.plat .pname{font-family:var(--serif);font-size:28px;line-height:1}
-.plat small{font-size:13px;color:var(--faint)}
-@media (max-width:760px){.plat-grid{grid-template-columns:repeat(2,1fr)}.plat{height:120px}}
+.plat-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:48px}
+.plat{flex:0 0 calc((100% - 72px)/7);height:104px;border:1px solid var(--line);border-radius:16px;display:flex;align-items:center;justify-content:center;padding:18px;background:#fff;transition:transform .3s ease, box-shadow .3s ease}
+.plat:hover{transform:translateY(-3px);box-shadow:0 16px 32px -20px rgba(0,0,0,.25)}
+.plat img{max-height:40px;max-width:100%;width:auto;height:auto;object-fit:contain}
+.plat.tall img{max-height:56px}
+@media (max-width:1000px){.plat{flex-basis:calc((100% - 36px)/4)}}
+@media (max-width:600px){.plat-grid{gap:8px}.plat{flex-basis:calc((100% - 8px)/2);height:84px;padding:14px}.plat img{max-height:32px}.plat.tall img{max-height:46px}}
 
 /* Réalisations (photos + vidéos) */
 .work{border-top:1px solid var(--line);padding:120px 0}
@@ -229,15 +230,16 @@ footer .logo{font-size:24px;color:var(--ink)}
 
   <section class="platforms" id="plateformes">
     <div class="wrap">
-      <div class="eyebrow reveal">Nos plateformes</div>
+      <div class="eyebrow reveal">Nos partenaires</div>
       <h2 class="reveal">Les plateformes <span class="it">qu'on maîtrise.</span></h2>
-      <!-- Logos : mets-les dans images/ avec les noms shopify, meta, google-ads, tiktok-ads
-           (.png, .svg, .jpg ou .webp). Tant qu'un logo n'est pas là, le nom s'affiche en texte. -->
       <div class="plat-grid">
-        <div class="plat reveal" data-plat="shopify"><span class="pname">Shopify</span><small>E-commerce</small></div>
-        <div class="plat reveal" data-plat="meta"><span class="pname">Meta</span><small>Facebook &amp; Instagram Ads</small></div>
-        <div class="plat reveal" data-plat="google-ads"><span class="pname">Google Ads</span><small>Search, Shopping &amp; YouTube</small></div>
-        <div class="plat reveal" data-plat="tiktok-ads"><span class="pname">TikTok Ads</span><small>Ads &amp; Shop</small></div>
+        <div class="plat reveal"><img src="images/partner-meta.png" alt="Meta Business Partner" loading="lazy"></div>
+        <div class="plat reveal"><img src="images/partner-shopify.png" alt="Shopify" loading="lazy"></div>
+        <div class="plat tall reveal"><img src="images/partner-google-ads.png" alt="Google Ads" loading="lazy"></div>
+        <div class="plat reveal"><img src="images/partner-google-merchant-center.png" alt="Google Merchant Center" loading="lazy"></div>
+        <div class="plat reveal"><img src="images/partner-tiktok-ads.png" alt="TikTok Ads" loading="lazy"></div>
+        <div class="plat tall reveal"><img src="images/partner-instagram.png" alt="Instagram" loading="lazy"></div>
+        <div class="plat reveal"><img src="images/partner-linkedin.png" alt="LinkedIn" loading="lazy"></div>
       </div>
     </div>
   </section>
@@ -403,12 +405,6 @@ const findImg = (name, ok, fail) => {
 };
 document.querySelectorAll('.logo-cell[data-logo]').forEach(cell => {
   findImg(cell.dataset.logo, img => { img.alt = 'Logo client'; cell.appendChild(img); }, () => cell.remove());
-});
-document.querySelectorAll('.plat[data-plat]').forEach(box => {
-  findImg(box.dataset.plat, img => {
-    img.alt = box.querySelector('.pname').textContent;
-    box.querySelector('.pname').replaceWith(img);
-  }, () => {});
 });
 
 /* Galerie : trouve la vidéo ou la photo de chaque case */
